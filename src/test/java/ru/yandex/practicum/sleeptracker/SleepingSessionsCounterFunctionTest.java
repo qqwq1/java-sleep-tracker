@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -30,7 +29,7 @@ public class SleepingSessionsCounterFunctionTest {
 
     @Test
     @DisplayName("Корректный подсчет числа сессий сна")
-    public void checkCorrectSleepingSessionsCount(){
+    public void checkCorrectSleepingSessionsCount() {
         SleepAnalysisResult result = new SleepingSessionsCounterFunction().apply(sleepingSessionList);
 
         Assertions.assertEquals("5", result.result);
@@ -38,7 +37,7 @@ public class SleepingSessionsCounterFunctionTest {
 
     @Test
     @DisplayName("Результат функции содержит описание расчета")
-    public void checkContainsNotEmptyDescription(){
+    public void checkContainsNotEmptyDescription() {
         SleepAnalysisResult result = new SleepingSessionsCounterFunction().apply(sleepingSessionList);
 
         Assertions.assertFalse(result.description.isBlank());
@@ -46,9 +45,9 @@ public class SleepingSessionsCounterFunctionTest {
 
     @Test
     @DisplayName("Пустой список сессий возвращает 0")
-    public void emptyReturnsZero(){
+    public void emptyReturnsZero() {
         SleepAnalysisResult result = new SleepingSessionsCounterFunction().apply(new ArrayList<>());
 
-        Assertions.assertEquals("0",result.result);
+        Assertions.assertEquals("0", result.result);
     }
 }
