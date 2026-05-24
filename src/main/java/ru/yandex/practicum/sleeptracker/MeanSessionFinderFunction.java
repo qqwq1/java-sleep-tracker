@@ -7,7 +7,7 @@ public class MeanSessionFinderFunction implements Function<List<SleepingSession>
     @Override
     public SleepAnalysisResult apply(List<SleepingSession> sleepingSessions) {
         double result = sleepingSessions.stream()
-                .mapToLong(s->s.duration.toMinutes())
+                .mapToLong(s -> s.duration.toMinutes())
                 .average()
                 .orElse(-1);
         String description = "Средняя продолжительность сна за данный период";
