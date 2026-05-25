@@ -1,4 +1,8 @@
-package ru.yandex.practicum.sleeptracker;
+package ru.yandex.practicum.sleeptracker.functions;
+
+import ru.yandex.practicum.sleeptracker.Chronotype;
+import ru.yandex.practicum.sleeptracker.SleepAnalysisResult;
+import ru.yandex.practicum.sleeptracker.SleepingSession;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -7,17 +11,18 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class UserTypeResolver implements Function<List<SleepingSession>, SleepAnalysisResult> {
+public class UserChronotypeResolver implements Function<List<SleepingSession>, SleepAnalysisResult> {
     private static final int END_OF_NIGHT = 6;
     private static final int OWL_SLEEP_FROM = 23;
     private static final int OWL_SLEEP_TO = 9;
     private static final int EARLY_SLEEP_FROM = 22;
     private static final int EARLY_SLEEP_TO = 7;
+    private final static String DESCRIPTION = "Тип пользователя за данный период";
 
 
     @Override
     public SleepAnalysisResult apply(List<SleepingSession> sleepingSessions) {
-        Map<UserType, Long> types = sleepingSessions.stream()
+        Map<Chronotype, Long> types = sleepingSessions.stream()
                 .filter(session -> {
                     LocalDateTime start = session.start;
                     LocalDateTime firstDayStart = start.minusHours(start.getHour()).minusMinutes(start.getMinute());
@@ -39,12 +44,11 @@ public class UserTypeResolver implements Function<List<SleepingSession>, SleepAn
                 })
                 .collect(Collectors.groupingBy(this::classify, Collectors.counting()));
 
-        UserType maxType = types.entrySet().stream()
+        Chronotype maxType = types.entrySet().stream()
                 .max(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
-                .orElse(UserType.DAY_BIRD);
-        String description = "Тип пользователя за данный период";
-        return new SleepAnalysisResult(description, maxType.name());
+                .orElse(Chronotype.DAY_BIRD);
+        return new SleepAnalysisResult(DESCRIPTION, maxType.name());
     }
 
     private boolean intervalsOverlap(LocalDateTime interval1Start, LocalDateTime interval1Finish,
@@ -52,7 +56,7 @@ public class UserTypeResolver implements Function<List<SleepingSession>, SleepAn
         return interval1Start.isBefore(interval2Finish) && interval1Finish.isAfter(interval2Start);
     }
 
-    private UserType classify(SleepingSession session) {
+    private Chronotype classify(SleepingSession session) {
         LocalDateTime start = session.start;
         LocalDateTime finish = session.finish;
 
@@ -63,12 +67,12 @@ public class UserTypeResolver implements Function<List<SleepingSession>, SleepAn
                 && finish.toLocalTime().isBefore(LocalTime.of(EARLY_SLEEP_TO, 0));
 
         if (owl) {
-            return UserType.NIGHT_OWL;
+            return Chronotype.NIGHT_OWL;
         }
         if (earlyBird) {
-            return UserType.EARLY_BIRD;
+            return Chronotype.EARLY_BIRD;
         }
-        return UserType.DAY_BIRD;
+        return Chronotype.DAY_BIRD;
     }
 
 

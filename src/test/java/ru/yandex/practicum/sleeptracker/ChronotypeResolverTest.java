@@ -2,21 +2,22 @@ package ru.yandex.practicum.sleeptracker;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.sleeptracker.functions.UserChronotypeResolver;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UserTypeResolverTest {
+public class ChronotypeResolverTest {
 
-    private final UserTypeResolver resolver = new UserTypeResolver();
+    private final UserChronotypeResolver resolver = new UserChronotypeResolver();
 
     @Test
     @DisplayName("пустой список — Голубь")
     public void emptyList_returns_DAY_BIRD() {
         SleepAnalysisResult result = resolver.apply(List.of());
-        assertEquals(UserType.DAY_BIRD.name(), result.result);
+        assertEquals(Chronotype.DAY_BIRD.name(), result.result);
     }
 
     @Test
@@ -30,7 +31,7 @@ public class UserTypeResolverTest {
                 )
         );
         SleepAnalysisResult result = resolver.apply(sessions);
-        assertEquals(UserType.NIGHT_OWL.name(), result.result);
+        assertEquals(Chronotype.NIGHT_OWL.name(), result.result);
     }
 
     @Test
@@ -44,7 +45,7 @@ public class UserTypeResolverTest {
                 )
         );
         SleepAnalysisResult result = resolver.apply(sessions);
-        assertEquals(UserType.EARLY_BIRD.name(), result.result);
+        assertEquals(Chronotype.EARLY_BIRD.name(), result.result);
     }
 
     @Test
@@ -58,7 +59,7 @@ public class UserTypeResolverTest {
                 )
         );
         SleepAnalysisResult result = resolver.apply(sessions);
-        assertEquals(UserType.DAY_BIRD.name(), result.result);
+        assertEquals(Chronotype.DAY_BIRD.name(), result.result);
     }
 
     @Test
@@ -82,7 +83,7 @@ public class UserTypeResolverTest {
                 )
         );
         SleepAnalysisResult result = resolver.apply(sessions);
-        assertEquals(UserType.NIGHT_OWL.name(), result.result);
+        assertEquals(Chronotype.NIGHT_OWL.name(), result.result);
     }
 
     @Test
@@ -101,7 +102,7 @@ public class UserTypeResolverTest {
                 )
         );
         SleepAnalysisResult result = resolver.apply(sessions);
-        assertEquals(UserType.EARLY_BIRD.name(), result.result);
+        assertEquals(Chronotype.EARLY_BIRD.name(), result.result);
     }
 
     @Test
@@ -115,6 +116,6 @@ public class UserTypeResolverTest {
                 )
         );
         SleepAnalysisResult result = resolver.apply(sessions);
-        assertEquals(UserType.DAY_BIRD.name(), result.result);
+        assertEquals(Chronotype.DAY_BIRD.name(), result.result);
     }
 }

@@ -1,4 +1,7 @@
-package ru.yandex.practicum.sleeptracker;
+package ru.yandex.practicum.sleeptracker.functions;
+
+import ru.yandex.practicum.sleeptracker.SleepAnalysisResult;
+import ru.yandex.practicum.sleeptracker.SleepingSession;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,6 +11,7 @@ import java.util.stream.Collectors;
 
 public class SleeplessNightCounterFunction implements Function<List<SleepingSession>, SleepAnalysisResult> {
     private static final int NIGHT_END_HOUR = 6;
+    private final static String DESCRIPTION = "Количество бессонных ночей за данный период";
 
     @Override
     public SleepAnalysisResult apply(List<SleepingSession> sleepingSessions) {
@@ -18,8 +22,7 @@ public class SleeplessNightCounterFunction implements Function<List<SleepingSess
                 .filter(daySessions -> !isSleepDuringNight(daySessions))
                 .count();
 
-        String description = "Количество бессонных ночей за данный период";
-        return new SleepAnalysisResult(description, String.valueOf(sleeplessNights));
+        return new SleepAnalysisResult(DESCRIPTION, String.valueOf(sleeplessNights));
     }
 
     private boolean isSleepDuringNight(List<SleepingSession> daySessions) {

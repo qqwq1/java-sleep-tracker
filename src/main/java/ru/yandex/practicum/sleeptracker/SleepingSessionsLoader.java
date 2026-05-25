@@ -20,18 +20,25 @@ public class SleepingSessionsLoader {
         try (BufferedReader reader = new BufferedReader(new FileReader(path.toFile()))) {
             return reader.lines()
                     .filter(line -> !line.isBlank())
-                    .map(line -> {
-                        String[] content = line.trim().split(";");
-                        LocalDateTime start = LocalDateTime.parse(content[0], formatter);
-                        LocalDateTime finish = LocalDateTime.parse(content[1], formatter);
-                        SleepQuality sleepQuality = SleepQuality.valueOf(content[2]);
-                        return new SleepingSession(start, finish, sleepQuality);
-                    })
+                    .map(SleepingSessionsLoader::parseLine)
                     .toList();
         } catch (FileNotFoundException e) {
             throw new FileNotFoundException("Не удалось найти файл по указанному пути ->" + path);
         } catch (IOException e) {
             throw new IOException("При чтении файла произошла ошибка, проверьте его целостность");
+        }
+    }
+
+    static private SleepingSession parseLine(String line) {
+        try {
+            String[] content = line.trim().split(";");
+            LocalDateTime start = LocalDateTime.parse(content[0], formatter);
+            LocalDateTime finish = LocalDateTime.parse(content[1], formatter);
+            SleepQuality sleepQuality = SleepQuality.valueOf(content[2]);
+            return new SleepingSession(start, finish, sleepQuality);
+        } catch (Exception e) {
+            System.out.println("Пропущена некорректная строка: " + line);
+            return null;
         }
     }
 }

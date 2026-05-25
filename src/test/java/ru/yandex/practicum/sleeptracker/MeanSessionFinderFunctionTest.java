@@ -1,6 +1,7 @@
 package ru.yandex.practicum.sleeptracker;
 
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.sleeptracker.functions.MeanSessionFinderFunction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,6 +43,6 @@ public class MeanSessionFinderFunctionTest {
 
         SleepAnalysisResult result = function.apply(sessions);
 
-        assertEquals("-1.0", result.result);
+        assertEquals("0.0", result.result);
     }
 }

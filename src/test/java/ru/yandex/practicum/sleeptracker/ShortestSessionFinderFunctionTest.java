@@ -1,6 +1,7 @@
 package ru.yandex.practicum.sleeptracker;
 
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.sleeptracker.functions.ShortestSessionFinderFunction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,6 +43,6 @@ public class ShortestSessionFinderFunctionTest {
 
         SleepAnalysisResult result = function.apply(sessions);
 
-        assertEquals("-1", result.result);
+        assertEquals("0", result.result);
     }
 }

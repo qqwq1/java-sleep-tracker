@@ -1,15 +1,18 @@
 package ru.yandex.practicum.sleeptracker;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.format.DateTimeParseException;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,19 +22,24 @@ public class SleepingSessionsLoaderTest {
     Path tempDir;
 
     @Test
-    public void testReadValidFile() throws IOException {
+    @DisplayName("валидный файл читается в список сессий")
+    public void readsValidFile() throws Exception {
         Path file = tempDir.resolve("valid_log.txt");
-        List<String> lines = List.of(
+        Files.write(file, List.of(
                 "01.01.26 22:00;02.01.26 06:00;GOOD",
                 "02.01.26 23:00;03.01.26 07:00;NORMAL"
-        );
-        Files.write(file, lines, StandardCharsets.UTF_8);
+        ), StandardCharsets.UTF_8);
 
         List<SleepingSession> sessions = SleepingSessionsLoader.readLogToSleepingSessions(file.toString());
 
         assertEquals(2, sessions.size());
+        assertNotNull(sessions.get(0));
+        assertNotNull(sessions.get(1));
+
         SleepingSession first = sessions.get(0);
         assertEquals(SleepQuality.GOOD, first.sleepQuality);
+        assertEquals(LocalDateTime.of(2026, 1, 1, 22, 0), first.start);
+        assertEquals(LocalDateTime.of(2026, 1, 2, 6, 0), first.finish);
         assertEquals(480L, first.duration.toMinutes());
 
         SleepingSession second = sessions.get(1);
@@ -40,63 +48,128 @@ public class SleepingSessionsLoaderTest {
     }
 
     @Test
-    public void testIgnoresBlankLines() throws IOException {
+    @DisplayName("пустые строки игнорируются")
+    public void ignoresBlankLines() throws Exception {
         Path file = tempDir.resolve("with_blank_lines.txt");
-        List<String> lines = List.of(
+        Files.write(file, List.of(
                 "",
                 "01.01.26 22:00;02.01.26 06:00;GOOD",
                 "   ",
+                "\t",
                 "02.01.26 23:00;03.01.26 07:00;NORMAL",
                 ""
-        );
-        Files.write(file, lines, StandardCharsets.UTF_8);
+        ), StandardCharsets.UTF_8);
 
         List<SleepingSession> sessions = SleepingSessionsLoader.readLogToSleepingSessions(file.toString());
 
         assertEquals(2, sessions.size());
+        assertTrue(sessions.stream().allMatch(Objects::nonNull));
     }
 
     @Test
-    public void testFileNotFoundThrows() {
-        String nonExistent = tempDir.resolve("does_not_exist.txt").toString();
-        FileNotFoundException thrown = assertThrows(FileNotFoundException.class,
-                () -> SleepingSessionsLoader.readLogToSleepingSessions(nonExistent));
-        assertTrue(thrown.getMessage().contains("Не удалось найти файл по указанному пути ->"));
+    @DisplayName("если файл не найден — выбрасывается FileNotFoundException с сообщением")
+    public void throwsFileNotFound() {
+        String missing = tempDir.resolve("no_such_file.txt").toString();
+
+        FileNotFoundException ex = assertThrows(FileNotFoundException.class,
+                () -> SleepingSessionsLoader.readLogToSleepingSessions(missing));
+
+        assertTrue(ex.getMessage().contains("Не удалось найти файл по указанному пути ->"));
     }
 
     @Test
-    public void testInvalidDateThrows() throws IOException {
+    @DisplayName("некорректная дата не падает, печатает сообщение и возвращает null в списке")
+    public void invalidDatePrintsMessageAndAddsNull() throws Exception {
         Path file = tempDir.resolve("bad_date.txt");
-        List<String> lines = List.of(
+        Files.write(file, List.of(
                 "invalid-date;02.01.26 06:00;GOOD"
-        );
-        Files.write(file, lines, StandardCharsets.UTF_8);
+        ), StandardCharsets.UTF_8);
 
-        assertThrows(DateTimeParseException.class,
-                () -> SleepingSessionsLoader.readLogToSleepingSessions(file.toString()));
+        String out = captureStdout(() -> {
+            try {
+                SleepingSessionsLoader.readLogToSleepingSessions(file.toString());
+            } catch (Exception e) {
+                fail("Исключение не ожидается при некорректной строке: " + e);
+            }
+        });
+
+        List<SleepingSession> sessions = SleepingSessionsLoader.readLogToSleepingSessions(file.toString());
+        assertEquals(1, sessions.size());
+        assertNull(sessions.get(0));
+        assertTrue(out.contains("Пропущена некорректная строка:"), "Ожидается сообщение о пропуске строки");
     }
 
     @Test
-    public void testInvalidEnumThrows() throws IOException {
+    @DisplayName("некорректный enum не падает, печатает сообщение и возвращает null в списке")
+    public void invalidEnumPrintsMessageAndAddsNull() throws Exception {
         Path file = tempDir.resolve("bad_enum.txt");
-        List<String> lines = List.of(
+        Files.write(file, List.of(
                 "01.01.26 22:00;02.01.26 06:00;NOT_A_QUALITY"
-        );
-        Files.write(file, lines, StandardCharsets.UTF_8);
+        ), StandardCharsets.UTF_8);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> SleepingSessionsLoader.readLogToSleepingSessions(file.toString()));
+        String out = captureStdout(() -> {
+            try {
+                SleepingSessionsLoader.readLogToSleepingSessions(file.toString());
+            } catch (Exception e) {
+                fail("Исключение не ожидается при некорректной строке: " + e);
+            }
+        });
+
+        List<SleepingSession> sessions = SleepingSessionsLoader.readLogToSleepingSessions(file.toString());
+        assertEquals(1, sessions.size());
+        assertNull(sessions.get(0));
+        assertTrue(out.contains("Пропущена некорректная строка:"), "Ожидается сообщение о пропуске строки");
     }
 
     @Test
-    public void testMalformedLineThrowsArrayIndexOutOfBounds() throws IOException {
+    @DisplayName("строка без разделителей не падает, печатает сообщение и возвращает null в списке")
+    public void malformedLinePrintsMessageAndAddsNull() throws Exception {
         Path file = tempDir.resolve("malformed.txt");
-        List<String> lines = List.of(
+        Files.write(file, List.of(
                 "01.01.26 22:00"
-        );
-        Files.write(file, lines, StandardCharsets.UTF_8);
+        ), StandardCharsets.UTF_8);
 
-        assertThrows(ArrayIndexOutOfBoundsException.class,
-                () -> SleepingSessionsLoader.readLogToSleepingSessions(file.toString()));
+        String out = captureStdout(() -> {
+            try {
+                SleepingSessionsLoader.readLogToSleepingSessions(file.toString());
+            } catch (Exception e) {
+                fail("Исключение не ожидается при некорректной строке: " + e);
+            }
+        });
+
+        List<SleepingSession> sessions = SleepingSessionsLoader.readLogToSleepingSessions(file.toString());
+        assertEquals(1, sessions.size());
+        assertNull(sessions.get(0));
+        assertTrue(out.contains("Пропущена некорректная строка:"), "Ожидается сообщение о пропуске строки");
+    }
+
+    @Test
+    @DisplayName("смешанный файл: корректные строки + некорректные строки")
+    public void mixedFileContainsNullsForBadLines() throws Exception {
+        Path file = tempDir.resolve("mixed.txt");
+        Files.write(file, List.of(
+                "01.01.26 22:00;02.01.26 06:00;GOOD",
+                "bad_line",
+                "02.01.26 23:00;03.01.26 07:00;NORMAL",
+                "01.01.26 22:00;02.01.26 06:00;NOT_A_QUALITY"
+        ), StandardCharsets.UTF_8);
+
+        List<SleepingSession> sessions = SleepingSessionsLoader.readLogToSleepingSessions(file.toString());
+
+        assertEquals(4, sessions.size());
+        assertEquals(2, sessions.stream().filter(Objects::isNull).count());
+        assertEquals(2, sessions.stream().filter(Objects::nonNull).count());
+    }
+
+    private String captureStdout(Runnable action) {
+        PrintStream oldOut = System.out;
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(buffer, true, StandardCharsets.UTF_8));
+        try {
+            action.run();
+        } finally {
+            System.setOut(oldOut);
+        }
+        return buffer.toString(StandardCharsets.UTF_8);
     }
 }

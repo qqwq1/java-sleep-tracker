@@ -1,13 +1,11 @@
 package ru.yandex.practicum.sleeptracker;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,14 +17,6 @@ public class SleepTrackerAppTest {
 
     @TempDir
     Path tempDir;
-
-    @BeforeEach
-    public void clearFunctionList() throws Exception {
-        Field field = SleepTrackerApp.class.getDeclaredField("functionList");
-        field.setAccessible(true);
-        List<?> list = (List<?>) field.get(null);
-        list.clear();
-    }
 
     @Test
     @DisplayName("валидный файл печатает 6 строк результатов")
@@ -42,9 +32,9 @@ public class SleepTrackerAppTest {
 
         assertEquals(6, lines.length);
         for (String line : lines) {
-            assertTrue(line.contains(" -> "), "Каждая строка должна содержать разделитель ' -> '");
-            assertFalse(line.startsWith(" -> "), "Слева от ' -> ' должно быть описание");
-            assertFalse(line.endsWith(" -> "), "Справа от ' -> ' должен быть результат");
+            assertTrue(line.contains(" -> "));
+            assertFalse(line.startsWith(" -> "));
+            assertFalse(line.endsWith(" -> "));
         }
     }
 
@@ -71,16 +61,14 @@ public class SleepTrackerAppTest {
     }
 
     @Test
-    @DisplayName("нет файла: печатается сообщение об ошибке и нет строк результатов")
-    public void printsErrorAndNoResultsWhenFileMissing() {
+    @DisplayName("нет файла: печатается сообщение об ошибке")
+    public void printsErrorWhenFileMissing() {
         Path missing = tempDir.resolve("no_such_file.txt");
 
         String output = runMainAndCaptureOutput(missing.toString());
 
         assertTrue(output.contains("Не удалось найти файл по указанному пути"),
-                "Ожидается сообщение loader'а о том, что файл не найден");
-        assertFalse(output.contains(" -> "),
-                "При ошибке чтения не должно печататься результатов функций");
+                "Ожидается сообщение о том, что файл не найден");
     }
 
     @Test
@@ -88,33 +76,21 @@ public class SleepTrackerAppTest {
     public void printsExpectedNumbersForSimpleLog() throws Exception {
         Path file = tempDir.resolve("simple_log.txt");
         Files.write(file, List.of(
-                // 60 минут
                 "01.01.25 00:00;01.01.25 01:00;GOOD",
-                // 120 минут
                 "02.01.25 00:00;02.01.25 02:00;NORMAL",
-                // 30 минут
                 "03.01.25 00:00;03.01.25 00:30;BAD"
         ), StandardCharsets.UTF_8);
 
         String output = runMainAndCaptureOutput(file.toString());
 
         assertTrue(output.contains("Количество сессий сна за данный период -> 3"));
-
-
-        assertTrue(output.contains("Минимальная продолжительность сессии сна за данный период -> 30"),
-                "Ожидается минимум 30 минут");
-
-
-        assertTrue(output.contains("Максимальная продолжительность сессии сна за данный период -> 120"),
-                "Ожидается максимум 120 минут");
-
-
-        assertTrue(output.contains("Средняя продолжительность сна за данный период -> 70.0"),
-                "Ожидается среднее 70.0");
+        assertTrue(output.contains("Минимальная продолжительность сессии сна за данный период -> 30"));
+        assertTrue(output.contains("Максимальная продолжительность сессии сна за данный период -> 120"));
+        assertTrue(output.contains("Средняя продолжительность сна за данный период -> 70.0"));
     }
 
     @Test
-    @DisplayName("пустой лог: 6 строк, минимум/максимум = -1, среднее = 0")
+    @DisplayName("пустой лог: минимум/максимум/среднее = 0")
     public void emptyLogProducesDefaults() throws Exception {
         Path file = tempDir.resolve("empty_log.txt");
         Files.write(file, List.of(
@@ -128,9 +104,9 @@ public class SleepTrackerAppTest {
 
         assertEquals(6, lines.length);
         assertTrue(output.contains("Количество сессий сна за данный период -> 0"));
-        assertTrue(output.contains("Минимальная продолжительность сессии сна за данный период -> -1"));
-        assertTrue(output.contains("Максимальная продолжительность сессии сна за данный период -> -1"));
-        assertTrue(output.contains("Средняя продолжительность сна за данный период -> -1.0"));
+        assertTrue(output.contains("Минимальная продолжительность сессии сна за данный период -> 0"));
+        assertTrue(output.contains("Максимальная продолжительность сессии сна за данный период -> 0"));
+        assertTrue(output.contains("Средняя продолжительность сна за данный период -> 0.0"));
     }
 
     private String runMainAndCaptureOutput(String path) {

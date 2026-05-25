@@ -1,17 +1,21 @@
-package ru.yandex.practicum.sleeptracker;
+package ru.yandex.practicum.sleeptracker.functions;
+
+import ru.yandex.practicum.sleeptracker.SleepAnalysisResult;
+import ru.yandex.practicum.sleeptracker.SleepingSession;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 
 public class LongestSessionFinderFunction implements Function<List<SleepingSession>, SleepAnalysisResult> {
+    private final static String DESCRIPTION = "Максимальная продолжительность сессии сна за данный период";
+
     @Override
     public SleepAnalysisResult apply(List<SleepingSession> sleepingSessions) {
         long result = sleepingSessions.stream()
                 .max(Comparator.comparing(s -> s.duration))
                 .map(s -> s.duration.toMinutes())
-                .orElse(-1L);
-        String description = "Максимальная продолжительность сессии сна за данный период";
-        return new SleepAnalysisResult(description, Long.toString(result));
+                .orElse(0L);
+        return new SleepAnalysisResult(DESCRIPTION, Long.toString(result));
     }
 }
