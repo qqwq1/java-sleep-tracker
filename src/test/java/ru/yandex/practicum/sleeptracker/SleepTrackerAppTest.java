@@ -19,7 +19,7 @@ public class SleepTrackerAppTest {
     Path tempDir;
 
     @Test
-    @DisplayName("валидный файл печатает 6 строк результатов")
+    @DisplayName("валидный файл печатает 7 строк результатов")
     public void printsSixResultLinesForValidFile() throws Exception {
         Path file = tempDir.resolve("log.txt");
         Files.write(file, List.of(
@@ -30,7 +30,7 @@ public class SleepTrackerAppTest {
         String output = runMainAndCaptureOutput(file.toString());
         String[] lines = output.strip().split("\\R");
 
-        assertEquals(6, lines.length);
+        assertEquals(7, lines.length);
         for (String line : lines) {
             assertTrue(line.contains(" -> "));
             assertFalse(line.startsWith(" -> "));
@@ -102,7 +102,7 @@ public class SleepTrackerAppTest {
         String output = runMainAndCaptureOutput(file.toString());
         String[] lines = output.strip().split("\\R");
 
-        assertEquals(6, lines.length);
+        assertEquals(7, lines.length);
         assertTrue(output.contains("Количество сессий сна за данный период -> 0"));
         assertTrue(output.contains("Минимальная продолжительность сессии сна за данный период -> 0"));
         assertTrue(output.contains("Максимальная продолжительность сессии сна за данный период -> 0"));
