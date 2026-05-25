@@ -13,8 +13,8 @@ public class BadSleepQualityFinderFunction implements Function<List<SleepingSess
     @Override
     public SleepAnalysisResult apply(List<SleepingSession> sleepingSessions) {
         long badSleepingSessionsCount = sleepingSessions.stream()
-                .filter(session -> session.sleepQuality== SleepQuality.BAD)
+                .filter(session -> session.sleepQuality == SleepQuality.BAD)
                 .count();
-        return new SleepAnalysisResult(DESCRIPTION,String.valueOf(badSleepingSessionsCount));
+        return new SleepAnalysisResult(DESCRIPTION, String.valueOf(badSleepingSessionsCount));
     }
 }
