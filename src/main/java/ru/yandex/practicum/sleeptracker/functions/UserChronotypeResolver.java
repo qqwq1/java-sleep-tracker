@@ -17,7 +17,7 @@ public class UserChronotypeResolver implements Function<List<SleepingSession>, S
     private static final int OWL_SLEEP_TO = 9;
     private static final int EARLY_SLEEP_FROM = 22;
     private static final int EARLY_SLEEP_TO = 7;
-    private final static String DESCRIPTION = "Тип пользователя за данный период";
+    private static final String DESCRIPTION = "Тип пользователя за данный период";
 
 
     @Override

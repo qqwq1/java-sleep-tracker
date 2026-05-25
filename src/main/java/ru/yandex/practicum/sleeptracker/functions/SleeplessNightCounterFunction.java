@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class SleeplessNightCounterFunction implements Function<List<SleepingSession>, SleepAnalysisResult> {
     private static final int NIGHT_END_HOUR = 6;
-    private final static String DESCRIPTION = "Количество бессонных ночей за данный период";
+    private static final String DESCRIPTION = "Количество бессонных ночей за данный период";
 
     @Override
     public SleepAnalysisResult apply(List<SleepingSession> sleepingSessions) {

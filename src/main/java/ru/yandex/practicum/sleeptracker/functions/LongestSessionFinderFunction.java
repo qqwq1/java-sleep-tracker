@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class LongestSessionFinderFunction implements Function<List<SleepingSession>, SleepAnalysisResult> {
-    private final static String DESCRIPTION = "Максимальная продолжительность сессии сна за данный период";
+    private static final String DESCRIPTION = "Максимальная продолжительность сессии сна за данный период";
 
     @Override
     public SleepAnalysisResult apply(List<SleepingSession> sleepingSessions) {

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class ShortestSessionFinderFunction implements Function<List<SleepingSession>, SleepAnalysisResult> {
-    private final static String DESCRIPTION = "Минимальная продолжительность сессии сна за данный период";
+    private static final String DESCRIPTION = "Минимальная продолжительность сессии сна за данный период";
     @Override
     public SleepAnalysisResult apply(List<SleepingSession> sleepingSessions) {
         long result = sleepingSessions.stream()
