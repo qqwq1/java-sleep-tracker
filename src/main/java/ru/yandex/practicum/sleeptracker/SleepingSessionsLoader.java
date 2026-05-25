@@ -29,7 +29,7 @@ public class SleepingSessionsLoader {
         }
     }
 
-    static private SleepingSession parseLine(String line) {
+    private static SleepingSession parseLine(String line) {
         try {
             String[] content = line.trim().split(";");
             LocalDateTime start = LocalDateTime.parse(content[0], formatter);
